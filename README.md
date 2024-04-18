@@ -5,7 +5,7 @@
 
 ## Todo
 - [x] create a tcp listener
-- [ ] parse incoming RESP data
+- [x] parse incoming RESP data
     - [x] simple string
     - [x] bulk string
     - [x] simple error
