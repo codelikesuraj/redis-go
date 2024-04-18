@@ -10,9 +10,9 @@
     - [x] bulk string
     - [x] simple error
     - [x] integer
-    - [ ] arrays
-        - [ ] single data type
-        - [ ] multiple data type
+    - [x] arrays
+        - [x] single data type
+        - [x] multiple data type
 - [ ] format outgoing RESP data
     - [ ] simple string
     - [ ] bulk string
