@@ -19,58 +19,44 @@ func main() {
 	log.Println("Started listening for connections on", listener.Addr())
 
 	// accept incoming connections
-	conn, err := listener.Accept()
-	if err != nil {
-		log.Fatalln("failed to accept connection:", err.Error())
-	}
-	defer conn.Close()
-
-	log.Println("Accepted connection from", conn.RemoteAddr())
-
 	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			log.Fatalln("failed to accept connection:", err.Error())
+		}
+		defer conn.Close()
+
+		// log.Println("Accepted connection from", conn.RemoteAddr())	// debugging info
+
 		// read message from client
-		resp := NewResp(conn)
-		_, err = resp.Read()
+		respReader := NewRespReader(conn)
+		val, err := respReader.Read()
 		if err != nil {
 			log.Fatalln("error reading from client:", err.Error())
 		}
 
+		var respVal Value
+		if val.typ == SIMPLE_STRING && strings.ToLower(val.str) == "ping" {
+			respVal.typ = val.typ
+			respVal.str = "PONG"
+		} else if val.typ == BULK_STRINGS && strings.ToLower(val.bulk) == "ping" {
+			respVal.typ = val.typ
+			respVal.str = "PONG"
+		} else if val.typ == ARRAYS && val.arr[0].typ == BULK_STRINGS && strings.ToLower(val.arr[0].bulk) == "ping" {
+			respVal.typ = SIMPLE_STRING
+			respVal.str = "PONG"
+		} else {
+			respVal.typ = SIMPLE_STRING
+			respVal.str = "IT WORKS"
+		}
+
 		// ignore request and send back "PONG"
-		conn.Write([]byte("+PONG\r\n"))
-	}
+		// write message to client
+		err = NewRespWriter(conn).Write(respVal)
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
 
-	// testOnlyNestedArrays()
-}
-
-func testOnlyNestedArrays() {
-	// test nested array
-	input := "*9\r\n"
-	input += "$4\r\n"
-	input += "this\r\n"
-	input += "$2\r\n"
-	input += "is\r\n"
-	input += "+an\r\n"
-	input += "+array\r\n"
-	input += "*5\r\n"
-	input += "+with\r\n"
-	input += "+an\r\n"
-	input += "+inside\r\n"
-	input += "+value\r\n"
-	input += "*3\r\n"
-	input += "+also with an \r\n"
-	input += "+inside number\r\n"
-	input += ":4\r\n"
-	input += "$3\r\n"
-	input += "and\r\n"
-	input += "$1\r\n"
-	input += "a\r\n"
-	input += "+simple string outside\r\n"
-	input += "$4\r\n"
-	input += "value\r\n"
-
-	resp := NewResp(strings.NewReader(input))
-	_, err := resp.Read()
-	if err != nil {
-		log.Fatalln("error reading from client:", err.Error())
+		// log.Println("Closed connection with", conn.RemoteAddr())	// debugging info
 	}
 }

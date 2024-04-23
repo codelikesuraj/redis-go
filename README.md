@@ -13,14 +13,15 @@
     - [x] arrays
         - [x] single data type
         - [x] multiple data type
-- [ ] format outgoing RESP data
-    - [ ] simple string
-    - [ ] bulk string
-    - [ ] simple error
-    - [ ] integer
-    - [ ] arrays
-        - [ ] single data type
-        - [ ] multiple data type
+- [x] format outgoing RESP data
+    - [x] simple string
+    - [x] bulk string
+    - [x] simple error
+    - [x] integer
+    - [x] arrays
+    - [x] null
+        - [x] single data type
+        - [x] multiple data type
 - [ ] accept basic commands
     - [ ] SET {data} {value}
     - [ ] GET {data}
