@@ -24,7 +24,6 @@ func main() {
 		if err != nil {
 			log.Fatalln("failed to accept connection:", err.Error())
 		}
-		defer conn.Close()
 
 		// log.Println("Accepted connection from", conn.RemoteAddr())	// debugging info
 
@@ -35,28 +34,38 @@ func main() {
 			log.Fatalln("error reading from client:", err.Error())
 		}
 
-		var respVal Value
-		if val.typ == SIMPLE_STRING && strings.ToLower(val.str) == "ping" {
-			respVal.typ = val.typ
-			respVal.str = "PONG"
-		} else if val.typ == BULK_STRINGS && strings.ToLower(val.bulk) == "ping" {
-			respVal.typ = val.typ
-			respVal.str = "PONG"
-		} else if val.typ == ARRAYS && val.arr[0].typ == BULK_STRINGS && strings.ToLower(val.arr[0].bulk) == "ping" {
-			respVal.typ = SIMPLE_STRING
-			respVal.str = "PONG"
-		} else {
-			respVal.typ = SIMPLE_STRING
-			respVal.str = "IT WORKS"
+		respWriter := NewRespWriter(conn)
+
+		if val.typ != ARRAYS {
+			respWriter.Write(Value{typ: SIMPLE_ERRORS, err: "invalid request, expected array"})
+			conn.Close()
+			continue
+		}
+
+		if len(val.arr) == 0 {
+			respWriter.Write(Value{typ: SIMPLE_ERRORS, err: "invalid request, expected array length > 0"})
+			conn.Close()
+			continue
+		}
+
+		command := strings.ToUpper(val.arr[0].bulk)
+		args := val.arr[1:]
+
+		handler, ok := Handlers[command]
+		if !ok {
+			respWriter.Write(Value{typ: SIMPLE_ERRORS, err: "invalid command: " + command})
+			conn.Close()
+			continue
 		}
 
 		// ignore request and send back "PONG"
 		// write message to client
-		err = NewRespWriter(conn).Write(respVal)
+		err = NewRespWriter(conn).Write(handler(args))
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
 
 		// log.Println("Closed connection with", conn.RemoteAddr())	// debugging info
+		conn.Close()
 	}
 }

@@ -23,7 +23,8 @@
     - ✅ null
         - ✅ single data type
         - ✅ multiple data type
-- ❌ accept basic commands
-    - ❌ SET {data} {value}
-    - ❌ GET {data}
+- ✅ accept basic commands
+    - ✅ SET {data} {value}
+    - ✅ GET {data}
+    - ✅ PING
 - ❌ setup data persistence (in-memory database)
