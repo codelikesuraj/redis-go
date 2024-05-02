@@ -1,7 +1,10 @@
 # Redis-Go - A simple implementation of a REDIS server in Golang
 
 ## Usage
-- go run main.go
+- ### Start the Redis-Go server
+    ```go run main.go```
+- ### Run your redis commands
+    ```redis-cli [command] [args...]```
 
 ## Todo
     
