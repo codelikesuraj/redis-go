@@ -18,6 +18,13 @@ func main() {
 
 	log.Println("Started listening for connections on", listener.Addr())
 
+	// create persistent storage
+	aof, err := NewAof("database.aof")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer aof.Close()
+
 	// accept incoming connections
 	for {
 		conn, err := listener.Accept()
@@ -58,11 +65,17 @@ func main() {
 			continue
 		}
 
+		res := handler(args)
+
 		// ignore request and send back "PONG"
 		// write message to client
-		err = NewRespWriter(conn).Write(handler(args))
+		err = NewRespWriter(conn).Write(res)
 		if err != nil {
 			log.Fatalln(err.Error())
+		}
+
+		if command == "SET" && res.typ != SIMPLE_ERRORS {
+			aof.Write(val)
 		}
 
 		// log.Println("Closed connection with", conn.RemoteAddr())	// debugging info
