@@ -18,12 +18,13 @@ func main() {
 
 	log.Println("Started listening for connections on", listener.Addr())
 
-	// create persistent storage
+	// initialiase persistent storage
 	aof, err := NewAof("database.aof")
 	if err != nil {
 		log.Fatalln(err)
 	}
 	defer aof.Close()
+	aof.Read()
 
 	// accept incoming connections
 	for {

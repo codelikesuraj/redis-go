@@ -27,4 +27,4 @@
     - ✅ SET {data} {value}
     - ✅ GET {data}
     - ✅ PING
-- ❌ setup data persistence (in-memory database)
+- ✅ setup data persistence (using Append-Only File)

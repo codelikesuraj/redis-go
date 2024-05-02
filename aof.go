@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"io"
 	"os"
 )
 
@@ -30,5 +31,23 @@ func (a *Aof) Write(value Value) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (a *Aof) Read() error {
+	for {
+		val, err := NewRespReader(a.rd).Read()
+
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			return err
+		}
+
+		Handlers["SET"](val.arr[1:])
+	}
+
 	return nil
 }
